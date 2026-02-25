@@ -1,0 +1,8 @@
+geminiService.js:47 
+ POST https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent 404 (Not Found)
+
+installHook.js:1 Gemini API error: GoogleGenerativeAIFetchError: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent: [404 ] models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+    at async analyzeWithGemini (geminiService.js:47:20)
+    at async handleConversationScenario (chatService.js:55:22)
+    at async processUserInput (chatService.js:16:10)
+    at async handleSend (ChatBox.jsx:28:24)
