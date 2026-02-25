@@ -1,0 +1,15 @@
+{
+  "session_id": "3c2e1494-1102-4959-9a79-4f0cd0f1ded3",
+  "business": "okay",
+  "created_at": "1e6a8261-b1e5-489b-992a-b5621ea63a18",
+  "workflow_step": 2,
+  "kyb_data": {
+    "business_understanding": [
+      "Business: okay"
+    ],
+    "objectives": [],
+    "constraints": [],
+    "summary": "",
+    "scraped_data": []
+  }
+}

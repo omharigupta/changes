@@ -1,74 +1,61 @@
 import re
 from services.gemini_service import analyze_with_gemini
 from services.scraper_service import scrape_url
-from services.chroma_service import store_in_chroma, query_chroma
+from services.workflow_service import WorkflowManager
 
-URL_REGEX = r'https?://[^\s]+'
+# Initialize workflow manager
+workflow_manager = WorkflowManager()
 
-def process_user_input(user_input, conversation_history):
-    """Process user input and determine scenario"""
-    urls = re.findall(URL_REGEX, user_input)
+def process_user_input(user_input, conversation_history, session_state=None):
+    """Process user input using hardcoded KYB workflow"""
     
-    # Scenario 1: URL provided
-    if urls:
-        return handle_url_scenario(urls[0], conversation_history)
+    # Initialize session_state if not provided
+    if session_state is None:
+        session_state = {}
     
-    # Scenario 2: Regular conversation
-    return handle_conversation_scenario(user_input, conversation_history)
-
-def handle_url_scenario(url, history):
-    """Handle URL scraping scenario"""
-    try:
-        scraped_data = scrape_url(url)
-        
-        analysis_input = f"""Extract business-related information from this scraped data:
-Title: {scraped_data['title']}
-Description: {scraped_data['meta_description']}
-Headings: {', '.join(scraped_data['headings'])}
-Content: {scraped_data['content'][:1000]}"""
-        
-        analysis = analyze_with_gemini(analysis_input, history)
-        
-        # Store in ChromaDB
-        store_in_chroma(
-            text=scraped_data['content'],
-            metadata={'source': url, 'type': 'scraped'}
-        )
-        
+    # Check if this is the first message
+    if not conversation_history or len(conversation_history) == 0:
         return {
-            'message': f"I've analyzed the URL and extracted key business information:\n\n{analysis.get('response', 'Analysis complete.')}",
-            'knowledge_update': analysis.get('knowledge_update')
+            'message': workflow_manager.get_initial_message(),
+            'session_state': session_state,
+            'knowledge_update': extract_knowledge_for_display(session_state)
         }
     
-    except Exception as e:
-        return {
-            'message': "I had trouble accessing that URL. Could you tell me about your business instead?",
-            'knowledge_update': None
-        }
+    # Process through hardcoded workflow (handles URLs internally)
+    response_message, updated_session_state = workflow_manager.process_workflow_step(
+        user_input, session_state
+    )
+    
+    return {
+        'message': response_message,
+        'session_state': updated_session_state,
+        'knowledge_update': extract_knowledge_for_display(updated_session_state)
+    }
 
-def handle_conversation_scenario(user_input, history):
-    """Handle regular conversation scenario"""
-    try:
-        # Query ChromaDB for context
-        context = query_chroma(user_input)
-        
-        # Analyze with Gemini
-        analysis = analyze_with_gemini(user_input, history, context)
-        
-        # Store conversation in ChromaDB
-        store_in_chroma(
-            text=user_input,
-            metadata={'type': 'conversation'}
-        )
-        
+def extract_knowledge_for_display(session_state):
+    """Extract knowledge data for display in the sidebar"""
+    if not session_state or 'kyb_data' not in session_state:
         return {
-            'message': analysis.get('response', 'I understand. Please tell me more.'),
-            'knowledge_update': analysis.get('knowledge_update')
+            'business_understanding': [],
+            'objectives': [],
+            'constraints': [],
+            'summary': ''
         }
     
-    except Exception as e:
-        print(f"Conversation error: {e}")
-        return {
-            'message': "Sorry, something went wrong. Please try again.",
-            'knowledge_update': None
-        }
+    kyb_data = session_state['kyb_data']
+    
+    return {
+        'business_understanding': kyb_data.get('business_understanding', []),
+        'objectives': kyb_data.get('objectives', []),
+        'constraints': kyb_data.get('constraints', []),
+        'summary': kyb_data.get('summary', f"Progress: Step {session_state.get('workflow_step', 1)}/8")
+    }
+
+def get_workflow_status(session_state):
+    """Get current workflow status for debugging"""
+    return {
+        'current_step': session_state.get('workflow_step', 1),
+        'session_id': session_state.get('session_id', 'Not set'),
+        'kyb_file': session_state.get('kyb_filepath', 'Not created'),
+        'business_info': session_state.get('what_they_sell', 'Not specified')
+    }

@@ -1,0 +1,13 @@
+{
+  "session_id": "fe592a0f-de78-4e8f-9e39-bd8537139b44",
+  "business": "course",
+  "created_at": "0b66299f-236f-452f-85a0-b9a38e85bc1f",
+  "workflow_step": 3,
+  "kyb_data": {
+    "business_understanding": [],
+    "objectives": [],
+    "constraints": [],
+    "summary": "",
+    "scraped_data": []
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "session_id": "7dabf814-39ee-4466-ad0a-9c612ba4e800",
+  "business": "hacking course",
+  "created_at": "2cc8aee0-b035-4dc7-8cff-2b321a4a5171",
+  "workflow_step": 3,
+  "kyb_data": {
+    "business_understanding": [],
+    "objectives": [],
+    "constraints": [],
+    "summary": "",
+    "scraped_data": []
+  }
+}
