@@ -44,7 +44,11 @@ with st.sidebar:
         st.markdown(f"**Current:** {current_step_name}")
         
         if workflow_status.get('business_info'):
-            business = workflow_status['business_info'].get('what_they_sell', 'Not specified')
+            business_info = workflow_status['business_info']
+            if isinstance(business_info, dict):
+                business = business_info.get('what_they_sell', 'Not specified')
+            else:
+                business = str(business_info)
             st.markdown(f"**Business:** {business}")
     
     view = st.radio("Navigation", ["KYB Chat", "Analytics", "Export"], label_visibility="collapsed")
